@@ -1,0 +1,95 @@
+From 7ae415dc863733295117cb7e47ba4b4d7a522b83 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Sun, 5 Oct 2014 11:48:01 -0400
+Subject: [PATCH] CustomAttackSpeed
+
+---
+ src/server/game/Entities/Unit/Unit.cpp       |  9 ++++++++-
+ src/server/game/World/World.cpp              |  3 ++-
+ src/server/game/World/World.h                |  3 ++-
+ src/server/worldserver/worldserver.conf.dist | 21 +++++++++++++++++++++
+ 4 files changed, 33 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/game/Entities/Unit/Unit.cpp b/src/server/game/Entities/Unit/Unit.cpp
+index a3b8adf..527d521 100644
+--- a/src/server/game/Entities/Unit/Unit.cpp
++++ b/src/server/game/Entities/Unit/Unit.cpp
+@@ -427,7 +427,14 @@ void Unit::DisableSpline()
+ 
+ void Unit::resetAttackTimer(WeaponAttackType type)
+ {
+-    m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
++    if (GetTypeId() == TYPEID_PLAYER || (ToCreature()->GetOwner() && ToCreature()->GetOwner()->GetTypeId() == TYPEID_PLAYER))
++    {
++        m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type] / sWorld->getFloatConfig(CONFIG_ATTACKSPEED_PLAYER));
++    }
++    else
++    {
++        m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type] / sWorld->getFloatConfig(CONFIG_ATTACKSPEED_ALL));
++    }
+ }
+ 
+ float Unit::GetMeleeReach() const
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 0b6a1ac..384b9f9 100644
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1122,7 +1122,8 @@ void World::LoadConfigSettings(bool reload)
+     // 12
+     // 13
+     // 14
+-    // 15
++    m_float_configs[CONFIG_ATTACKSPEED_PLAYER] = sConfigMgr->GetFloatDefault("Custom.AttackSpeedForPlayer", 1.0f);
++    m_float_configs[CONFIG_ATTACKSPEED_ALL] = sConfigMgr->GetFloatDefault("Custom.AttackSpeedForMobs", 1.0f);
+     // 16
+     // 17
+     // 18
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 05d0fcc..dd8a651 100644
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -211,7 +211,8 @@ enum WorldFloatConfigs
+     // 24
+     // 25
+     // 26
+-    // 27
++    CONFIG_ATTACKSPEED_PLAYER,
++    CONFIG_ATTACKSPEED_ALL,
+     // 28
+     // 29
+     // 30
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 43ea962..ccab3c3 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3232,6 +3232,27 @@ PacketSpoof.BanDuration = 86400
+ ###################################################################################################
+ 
+ #
++# Custom.AttackSpeedForPlayer
++# Set it to a number upper than 1 to speed up the attack of the player
++# Default : 1.0 (Normal speed)
++# Example : 2.0 (Player attack speed is 200% faster)
++#
++
++Custom.AttackSpeedForPlayer = 1.0
++
++#
++# Custom.AttackSpeedForMobs
++# Set it to a number upper than 1 to speed up the attack of the mobs
++# Default : 1.0 (Normal speed)
++# Example : 0.5 (Mobs attack speed is 50% slower)
++#
++
++Custom.AttackSpeedForMobs = 1.0
++
++#
++###################################################################################################
++
++#
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+ #
+-- 
+2.1.0
+

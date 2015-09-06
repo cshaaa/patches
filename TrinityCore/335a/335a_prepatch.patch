@@ -1,0 +1,1111 @@
+From bed144957ff0d6d3cf0e5ce189ef2b2519ad3afa Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Wed, 2 Sep 2015 01:41:21 -0500
+Subject: [PATCH] Updated prepatch to fix error in locations of a few files
+
+---
+ npc-entry-list.txt                                 |   30 +++
+ .../Database/Implementation/CharacterDatabase.cpp  |   24 ++
+ .../Database/Implementation/CharacterDatabase.h    |   25 +-
+ src/server/game/Accounts/RBAC.h                    |   24 ++
+ src/server/game/Entities/Player/Player.cpp         |   99 +++++++-
+ src/server/game/Entities/Player/Player.h           |   49 +++-
+ src/server/game/Handlers/BattleGroundHandler.cpp   |   25 +-
+ src/server/game/Handlers/CharacterHandler.cpp      |   50 +++-
+ src/server/game/Miscellaneous/Formulas.h           |   55 ++++-
+ src/server/game/Miscellaneous/Language.h           |   51 ++++-
+ src/server/game/Scripting/ScriptLoader.cpp         |  242 +++++++++++++++++++-
+ src/server/game/World/World.cpp                    |   50 +++-
+ src/server/game/World/World.h                      |   92 ++++++++
+ src/server/scripts/Custom/CMakeLists.txt           |    4 +-
+ src/server/worldserver/worldserver.conf.dist       |   27 +++
+ 15 files changed, 830 insertions(+), 17 deletions(-)
+ create mode 100644 npc-entry-list.txt
+
+diff --git a/npc-entry-list.txt b/npc-entry-list.txt
+new file mode 100644
+index 0000000..4df8044
+--- /dev/null
++++ b/npc-entry-list.txt
+@@ -0,0 +1,30 @@
++This is a list of all NPC's used in all of the patches.
++
++
++Entry         Name                     Script
++
++80000         Young Woman              All-In-One
++
++908001        The Lich King            Arena Gambler
++
++99990         LordPsyan                BeastMaster
++
++99014         George                   Bounty Hunter
++
++13            Beltez                   Guild Houses
++
++100000        Abyssal                  Vortex TeleNPC
++
++60002         LordPsyan                NPC Buff
++
++100067        Young Woman              Enchant NPC
++
++99013         "Lucky" Bob              Lottery NPC
++
++60001         Cyon                     Profession NPC
++
++60003         Lucy                     Level NPC
++
++190011        Thaumaturge Vashreen     Reforging
++
++190010        Warpweaver               Transmogrification
+\ No newline at end of file
+diff --git a/src/server/database/Database/Implementation/CharacterDatabase.cpp b/src/server/database/Database/Implementation/CharacterDatabase.cpp
+index 1efdb16..474c214 100644
+--- a/src/server/database/Database/Implementation/CharacterDatabase.cpp
++++ b/src/server/database/Database/Implementation/CharacterDatabase.cpp
+@@ -611,4 +611,28 @@ void CharacterDatabaseConnection::DoPrepareStatements()
+     PrepareStatement(CHAR_UPD_QUEST_TRACK_GM_COMPLETE, "UPDATE quest_tracker SET completed_by_gm = 1 WHERE id = ? AND character_guid = ? ORDER BY quest_accept_time DESC LIMIT 1", CONNECTION_ASYNC);
+     PrepareStatement(CHAR_UPD_QUEST_TRACK_COMPLETE_TIME, "UPDATE quest_tracker SET quest_complete_time = NOW() WHERE id = ? AND character_guid = ? ORDER BY quest_accept_time DESC LIMIT 1", CONNECTION_ASYNC);
+     PrepareStatement(CHAR_UPD_QUEST_TRACK_ABANDON_TIME, "UPDATE quest_tracker SET quest_abandon_time = NOW() WHERE id = ? AND character_guid = ? ORDER BY quest_accept_time DESC LIMIT 1", CONNECTION_ASYNC);
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+ }
+diff --git a/src/server/database/Database/Implementation/CharacterDatabase.h b/src/server/database/Database/Implementation/CharacterDatabase.h
+index f88a912..30602a0 100644
+--- a/src/server/database/Database/Implementation/CharacterDatabase.h
++++ b/src/server/database/Database/Implementation/CharacterDatabase.h
+@@ -543,7 +543,30 @@ enum CharacterDatabaseStatements
+     CHAR_UPD_QUEST_TRACK_GM_COMPLETE,
+     CHAR_UPD_QUEST_TRACK_COMPLETE_TIME,
+     CHAR_UPD_QUEST_TRACK_ABANDON_TIME,
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     MAX_CHARACTERDATABASE_STATEMENTS
+ };
+ 
+diff --git a/src/server/game/Accounts/RBAC.h b/src/server/game/Accounts/RBAC.h
+index 805f613..b06a9e2 100644
+--- a/src/server/game/Accounts/RBAC.h
++++ b/src/server/game/Accounts/RBAC.h
+@@ -698,6 +698,30 @@ enum RBACPermissions
+     RBAC_PERM_COMMAND_DEBUG_LOADCELLS                        = 835,
+ 
+     // custom permissions 1000+
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     RBAC_PERM_MAX
+ };
+ 
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 88d7dfa..3b71f95 100644
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -79,7 +79,31 @@
+ #include "WorldPacket.h"
+ #include "WorldSession.h"
+ #include "GameObjectAI.h"
+-
++#include "Config.h"
++// Prepatch by LordPsyan
++// 61
++// 62
++// 63
++// 64
++// 65
++// 66
++// 67
++// 68
++// 69
++// 70
++// 71
++// 72
++// 73
++// 74
++// 75
++// 76
++// 77
++// 78
++// 79
++// 80
++// Visit http://www.realmsofwarcraft.com/bb for forums and information
++//
++// End of prepatch
+ #define ZONE_UPDATE_INTERVAL (1*IN_MILLISECONDS)
+ 
+ #define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
+@@ -7117,6 +7141,30 @@ bool Player::RewardHonor(Unit* victim, uint32 groupsize, int32 honor, bool pvpto
+     }
+ 
+     honor_f *= sWorld->getRate(RATE_HONOR);
++    // Prepatch by LordPsyan
++    // 21
++    // 22
++    // 23
++    // 24
++    // 25
++    // 26
++    // 27
++    // 28
++    // 29
++    // 30
++    // 31
++    // 32
++    // 33
++    // 34
++    // 35
++    // 36
++    // 37
++    // 38
++    // 39
++    // 40
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     // Back to int now
+     honor = int32(honor_f);
+     // honor - for show honor points in log
+@@ -12478,6 +12526,30 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
+ {
+     if (Item* it = GetItemByPos(bag, slot))
+     {
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+         ItemRemovedQuestCheck(it->GetEntry(), it->GetCount());
+         RemoveItem(bag, slot, update);
+         it->SetNotRefundable(this, false);
+@@ -15218,7 +15290,30 @@ void Player::RewardQuest(Quest const* quest, uint32 reward, Object* questGiver,
+     Unit::AuraEffectList const& ModXPPctAuras = GetAuraEffectsByType(SPELL_AURA_MOD_XP_QUEST_PCT);
+     for (Unit::AuraEffectList::const_iterator i = ModXPPctAuras.begin(); i != ModXPPctAuras.end(); ++i)
+         AddPct(XP, (*i)->GetAmount());
+-
++    // Prepatch by LordPsyan
++    // 41
++    // 42
++    // 43
++    // 44
++    // 45
++    // 46
++    // 47
++    // 48
++    // 49
++    // 50
++    // 51
++    // 52
++    // 53
++    // 54
++    // 55
++    // 56
++    // 57
++    // 58
++    // 59
++    // 60
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     int32 moneyRew = 0;
+     if (getLevel() < sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+         GiveXP(XP, NULL);
+diff --git a/src/server/game/Entities/Player/Player.h b/src/server/game/Entities/Player/Player.h
+index a031840..91ba12b 100644
+--- a/src/server/game/Entities/Player/Player.h
++++ b/src/server/game/Entities/Player/Player.h
+@@ -2298,7 +2298,30 @@ class Player : public Unit, public GridObject<Player>
+ 
+         std::string GetMapAreaAndZoneString();
+         std::string GetCoordsMapAreaAndZoneString();
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     protected:
+         // Gamemaster whisper whitelist
+         GuidList WhisperList;
+@@ -2622,6 +2645,30 @@ class Player : public Unit, public GridObject<Player>
+         uint32 _pendingBindTimer;
+ 
+         uint32 _activeCheats;
++        // Prepatch by LordPsyan
++        // 21
++        // 22
++        // 23
++        // 24
++        // 25
++        // 26
++        // 27
++        // 28
++        // 29
++        // 30
++        // 31
++        // 32
++        // 33
++        // 34
++        // 35
++        // 36
++        // 37
++        // 38
++        // 39
++        // 40
++        // Visit http://www.realmsofwarcraft.com/bb for forums and information
++        //
++        // End of prepatch
+ };
+ 
+ void AddItemsSetItem(Player* player, Item* item);
+diff --git a/src/server/game/Handlers/BattleGroundHandler.cpp b/src/server/game/Handlers/BattleGroundHandler.cpp
+index 2ec89ac..37d8f8e 100644
+--- a/src/server/game/Handlers/BattleGroundHandler.cpp
++++ b/src/server/game/Handlers/BattleGroundHandler.cpp
+@@ -34,7 +34,30 @@
+ #include "Opcodes.h"
+ #include "DisableMgr.h"
+ #include "Group.h"
+-
++// Prepatch by LordPsyan
++// 01
++// 02
++// 03
++// 04
++// 05
++// 06
++// 07
++// 08
++// 09
++// 10
++// 11
++// 12
++// 13
++// 14
++// 15
++// 16
++// 17
++// 18
++// 19
++// 20
++// Visit http://www.realmsofwarcraft.com/bb for forums and information
++//
++// End of prepatch
+ void WorldSession::HandleBattlemasterHelloOpcode(WorldPacket& recvData)
+ {
+     ObjectGuid guid;
+diff --git a/src/server/game/Handlers/CharacterHandler.cpp b/src/server/game/Handlers/CharacterHandler.cpp
+index 11b31d9..f3e3266 100644
+--- a/src/server/game/Handlers/CharacterHandler.cpp
++++ b/src/server/game/Handlers/CharacterHandler.cpp
+@@ -992,10 +992,56 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
+     _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
+ 
+     sScriptMgr->OnPlayerLogin(pCurrChar, firstLogin);
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     delete holder;
+ }
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+ void WorldSession::HandleSetFactionAtWar(WorldPacket& recvData)
+ {
+     TC_LOG_DEBUG("network", "WORLD: Received CMSG_SET_FACTION_ATWAR");
+diff --git a/src/server/game/Miscellaneous/Formulas.h b/src/server/game/Miscellaneous/Formulas.h
+index ba39723..3e2ac94 100644
+--- a/src/server/game/Miscellaneous/Formulas.h
++++ b/src/server/game/Miscellaneous/Formulas.h
+@@ -23,7 +23,31 @@
+ #include "SharedDefines.h"
+ #include "ScriptMgr.h"
+ #include "Player.h"
+-
++#include "Config.h"
++// Prepatch by LordPsyan
++// 01
++// 02
++// 03
++// 04
++// 05
++// 06
++// 07
++// 08
++// 09
++// 10
++// 11
++// 12
++// 13
++// 14
++// 15
++// 16
++// 17
++// 18
++// 19
++// 20
++// Visit http://www.realmsofwarcraft.com/bb for forums and information
++//
++// End of prepatch
+ namespace Trinity
+ {
+     namespace Honor
+@@ -183,9 +207,36 @@ namespace Trinity
+ 
+                     xpMod *= creature->GetCreatureTemplate()->ModExperience;
+                 }
+-
++            if(sConfigMgr->GetBoolDefault("PrepatchGI.Added", false))
++                {
++                    // Prepatch by LordPsyan
++                    // 21
++                    // 22
++                    // 23
++                    // 24
++                    // 25
++                    // 26
++                    // 27
++                    // 28
++                    // 29
++                    // 30
++                    // 31
++                    // 32
++                    // 33
++                    // 34
++                    // 35
++                    // 36
++                    // 37
++                    // 38
++                    // 39
++                    // 40
++                    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++                    //
++                    // End of prepatch
++                } else {
+                 xpMod *= sWorld->getRate(RATE_XP_KILL);
+                 gain = uint32(gain * xpMod);
++                }
+             }
+ 
+             sScriptMgr->OnGainCalculation(gain, player, u);
+diff --git a/src/server/game/Miscellaneous/Language.h b/src/server/game/Miscellaneous/Language.h
+index a4ba986..7106320 100644
+--- a/src/server/game/Miscellaneous/Language.h
++++ b/src/server/game/Miscellaneous/Language.h
+@@ -1188,7 +1188,30 @@ enum TrinityStrings
+     // Use for custom patches             11000-11999
+     LANG_AUTO_BROADCAST                 = 11000,
+     LANG_INVALID_REALMID                = 11001,
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     // Show Kick in world
+     LANG_COMMAND_KICKMESSAGE_WORLD = 11002,
+ 
+@@ -1202,6 +1225,30 @@ enum TrinityStrings
+     LANG_BAN_ACCOUNT_YOUPERMBANNEDMESSAGE_WORLD   = 11007,
+ 
+     LANG_NPCINFO_INHABIT_TYPE                     = 11008,
+-    LANG_NPCINFO_FLAGS_EXTRA                      = 11009
++    LANG_NPCINFO_FLAGS_EXTRA                      = 11009,
++    // Prepatch by LordPsyan
++    // 21
++    // 22
++    // 23
++    // 24
++    // 25
++    // 26
++    // 27
++    // 28
++    // 29
++    // 30
++    // 31
++    // 32
++    // 33
++    // 34
++    // 35
++    // 36
++    // 37
++    // 38
++    // 39
++    // 40
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+ };
+ #endif
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 7c4b117..7e5f73a 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1415,13 +1415,251 @@ void AddBattlegroundScripts()
+ 
+ #ifdef SCRIPTS
+ /* This is where custom scripts' loading functions should be declared. */
+-
++// start01
++// start02
++// start03
++// start04
++// start05
++// start06
++// start07
++// start08
++// start09
++// start10
++// start11
++// start12
++// start13
++// start14
++// start15
++// start16
++// start17
++// start18
++// start19
++// start20
++// start21
++// start22
++// start23
++// start24
++// start25
++// start26
++// start27
++// start28
++// start29
++// start30
++// start31
++// start32
++// start33
++// start34
++// start35
++// start36
++// start37
++// start38
++// start39
++// start40
++// start41
++// start42
++// start43
++// start44
++// start45
++// start46
++// start47
++// start48
++// start49
++// start50
++// start51
++// start52
++// start53
++// start54
++// start55
++// start56
++// start57
++// start58
++// start59
++// start60
++// start61
++// start62
++// start63
++// start64
++// start65
++// start66
++// start67
++// start68
++// start69
++// start70
++// start71
++// start72
++// start73
++// start74
++// start75
++// start76
++// start77
++// start78
++// start79
++// start80
++// start81
++// start82
++// start83
++// start84
++// start85
++// start86
++// start87
++// start88
++// start89
++// start90
++// start91
++// start92
++// start93
++// start94
++// start95
++// start96
++// start97
++// start98
++// start99
++// start100
++// start101
++// start102
++// start103
++// start104
++// start105
++// start106
++// start107
++// start108
++// start109
++// start100
++// start111
++// start112
++// start113
++// start114
++// start115
++// start116
++// start117
++// start118
++// start119
++// start120
+ #endif
+ 
+ void AddCustomScripts()
+ {
+ #ifdef SCRIPTS
+     /* This is where custom scripts should be added. */
+-
++// end01
++// end02
++// end03
++// end04
++// end05
++// end06
++// end07
++// end08
++// end09
++// end10
++// end11
++// end12
++// end13
++// end14
++// end15
++// end16
++// end17
++// end18
++// end19
++// end20
++// end21
++// end22
++// end23
++// end24
++// end25
++// end26
++// end27
++// end28
++// end29
++// end30
++// end31
++// end32
++// end33
++// end34
++// end35
++// end36
++// end37
++// end38
++// end39
++// end40
++// end41
++// end42
++// end43
++// end44
++// end45
++// end46
++// end47
++// end48
++// end49
++// end50
++// end51
++// end52
++// end53
++// end54
++// end55
++// end56
++// end57
++// end58
++// end59
++// end60
++// end61
++// end62
++// end63
++// end64
++// end65
++// end66
++// end67
++// end68
++// end69
++// end70
++// end71
++// end72
++// end73
++// end74
++// end75
++// end76
++// end77
++// end78
++// end79
++// end80
++// end81
++// end82
++// end83
++// end84
++// end85
++// end86
++// end87
++// end88
++// end89
++// end90
++// end91
++// end92
++// end93
++// end94
++// end95
++// end96
++// end97
++// end98
++// end99
++// end100
++// end101
++// end102
++// end103
++// end104
++// end105
++// end106
++// end107
++// end108
++// end109
++// end100
++// end111
++// end112
++// end113
++// end114
++// end115
++// end116
++// end117
++// end118
++// end119
++// end120
+ #endif
+ }
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index b29f398..8476dcc 100644
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1120,7 +1120,30 @@ void World::LoadConfigSettings(bool reload)
+     m_visibility_notify_periodOnContinents = sConfigMgr->GetIntDefault("Visibility.Notify.Period.OnContinents", DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+     m_visibility_notify_periodInInstances = sConfigMgr->GetIntDefault("Visibility.Notify.Period.InInstances",   DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+     m_visibility_notify_periodInBGArenas = sConfigMgr->GetIntDefault("Visibility.Notify.Period.InBGArenas",    DEFAULT_VISIBILITY_NOTIFY_PERIOD);
+-
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     ///- Load the CharDelete related config options
+     m_int_configs[CONFIG_CHARDELETE_METHOD] = sConfigMgr->GetIntDefault("CharDelete.Method", 0);
+     m_int_configs[CONFIG_CHARDELETE_MIN_LEVEL] = sConfigMgr->GetIntDefault("CharDelete.MinLevel", 0);
+@@ -1293,7 +1316,30 @@ void World::LoadConfigSettings(bool reload)
+ 
+     m_bool_configs[CONFIG_CALCULATE_CREATURE_ZONE_AREA_DATA] = sConfigMgr->GetBoolDefault("Calculate.Creature.Zone.Area.Data", false);
+     m_bool_configs[CONFIG_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA] = sConfigMgr->GetBoolDefault("Calculate.Gameoject.Zone.Area.Data", false);
+-
++// Prepatch by LordPsyan
++// 01
++// 02
++// 03
++// 04
++// 05
++// 06
++// 07
++// 08
++// 09
++// 10
++// 11
++// 12
++// 13
++// 14
++// 15
++// 16
++// 17
++// 18
++// 19
++// 20
++// Visit http://www.realmsofwarcraft.com/bb for forums and information
++//
++// End of prepatch
+     // call ScriptMgr if we're reloading the configuration
+     if (reload)
+         sScriptMgr->OnConfigLoad(reload);
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index af89adc..11c527e 100644
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -158,6 +158,30 @@ enum WorldBoolConfigs
+     CONFIG_STATS_LIMITS_ENABLE,
+     CONFIG_INSTANCES_RESET_ANNOUNCE,
+     CONFIG_IP_BASED_ACTION_LOGGING,
++    // Prepatch by LordPsyan
++    // 01
++    // 02
++    // 03
++    // 04
++    // 05
++    // 06
++    // 07
++    // 08
++    // 09
++    // 10
++    // 11
++    // 12
++    // 13
++    // 14
++    // 15
++    // 16
++    // 17
++    // 18
++    // 19
++    // 20
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     CONFIG_ALLOW_TRACK_BOTH_RESOURCES,
+     CONFIG_CALCULATE_CREATURE_ZONE_AREA_DATA,
+     CONFIG_CALCULATE_GAMEOBJECT_ZONE_AREA_DATA,
+@@ -181,6 +205,50 @@ enum WorldFloatConfigs
+     CONFIG_STATS_LIMITS_PARRY,
+     CONFIG_STATS_LIMITS_BLOCK,
+     CONFIG_STATS_LIMITS_CRIT,
++    // Prepatch by LordPsyan
++    // 21
++    // 22
++    // 23
++    // 24
++    // 25
++    // 26
++    // 27
++    // 28
++    // 29
++    // 30
++    // 31
++    // 32
++    // 33
++    // 34
++    // 35
++    // 36
++    // 37
++    // 38
++    // 39
++    // 40
++    // 41
++    // 42
++    // 43
++    // 44
++    // 45
++    // 46
++    // 47
++    // 48
++    // 49
++    // 50
++    // 51
++    // 52
++    // 53
++    // 54
++    // 55
++    // 56
++    // 57
++    // 58
++    // 59
++    // 60
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     FLOAT_CONFIG_VALUE_COUNT
+ };
+ 
+@@ -347,6 +415,30 @@ enum WorldIntConfigs
+     CONFIG_CHARTER_COST_ARENA_5v5,
+     CONFIG_NO_GRAY_AGGRO_ABOVE,
+     CONFIG_NO_GRAY_AGGRO_BELOW,
++    // Prepatch by LordPsyan
++    // 61
++    // 62
++    // 63
++    // 64
++    // 65
++    // 66
++    // 67
++    // 68
++    // 69
++    // 70
++    // 71
++    // 72
++    // 73
++    // 74
++    // 75
++    // 76
++    // 77
++    // 78
++    // 79
++    // 80
++    // Visit http://www.realmsofwarcraft.com/bb for forums and information
++    //
++    // End of prepatch
+     INT_CONFIG_VALUE_COUNT
+ };
+ 
+diff --git a/src/server/scripts/Custom/CMakeLists.txt b/src/server/scripts/Custom/CMakeLists.txt
+index 5218f76..b91b179 100644
+--- a/src/server/scripts/Custom/CMakeLists.txt
++++ b/src/server/scripts/Custom/CMakeLists.txt
+@@ -8,11 +8,11 @@
+ # WITHOUT ANY WARRANTY, to the extent permitted by law; without even the
+ # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+-# file(GLOB_RECURSE sources_Custom Custom/*.cpp Custom/*.h)
++file(GLOB_RECURSE sources_Custom Custom/*.cpp Custom/*.h)
+ 
+ set(scripts_STAT_SRCS
+   ${scripts_STAT_SRCS}
+-#  ${sources_Custom}
++  ${sources_Custom}
+ )
+ 
+ message("  -> Prepared: Custom")
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 8e06c1c..3aa2d19 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3,6 +3,28 @@
+ ################################################
+ [worldserver]
+ 
++################################################
++#         Prepatch config by LordPsyan         #
++#       http://www.realmsofwarcraft.com/       #
++################################################
++
++###################################################################################################
++#
++# Prepatch Configuration
++#
++#
++# If you add GuildLevelSystem or Individual XP Rate patches, you must
++# set this to 1.
++#
++# PrepatchGI Added
++#         default = 0 (GuildLevelSystem and Individual XP Rate not added)
++#                 = 1 (GuildLevelSystem and/or Individual XP Rate added)
++
++PrepatchGI.Added = 0
++
++#
++###################################################################################################
++
+ ###################################################################################################
+ # SECTION INDEX
+ #
+@@ -3381,3 +3403,8 @@ PacketSpoof.BanDuration = 86400
+ 
+ #
+ ###################################################################################################
++
++#
++# Prepatch by LordPsyan.
++# See http://www.realmsofwarcraft.com/bb for forums and information.
++#
+-- 
+1.7.10.4
+

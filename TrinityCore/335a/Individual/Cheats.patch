@@ -1,0 +1,168 @@
+From 1029d877dbf8ee048c35f064f35e90090e13a692 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Fri, 4 Sep 2015 09:20:25 -0500
+Subject: [PATCH] Updated Cheats patch. Removed spell cooldown stuffs, since
+ it was removed from core (anyone know how it was replaced?)
+
+---
+ src/server/game/Entities/Player/Player.cpp   |   14 +++++++++----
+ src/server/game/Spells/Spell.cpp             |    4 ++--
+ src/server/game/Spells/SpellInfo.cpp         |    6 +++++-
+ src/server/game/World/World.cpp              |    4 +++-
+ src/server/game/World/World.h                |    5 +++--
+ src/server/worldserver/worldserver.conf.dist |   29 ++++++++++++++++++++++++++
+ 6 files changed, 52 insertions(+), 10 deletions(-)
+
+diff --git a/src/server/game/Entities/Player/Player.cpp b/src/server/game/Entities/Player/Player.cpp
+index 3b71f95..008164c 100644
+--- a/src/server/game/Entities/Player/Player.cpp
++++ b/src/server/game/Entities/Player/Player.cpp
+@@ -1712,7 +1712,10 @@ void Player::Update(uint32 p_time)
+ 
+                     // do attack
+                     AttackerStateUpdate(victim, BASE_ATTACK);
+-                    resetAttackTimer(BASE_ATTACK);
++                    if (sWorld->getBoolConfig(CONFIG_HURT_IN_REAL_TIME))
++                        AttackStop();
++                    else
++                        resetAttackTimer(BASE_ATTACK);
+                 }
+             }
+ 
+@@ -22614,10 +22617,13 @@ void Player::SendInitialPacketsBeforeAddToMap()
+ 
+     SendEquipmentSetList();
+ 
++    float speedrate = sWorld->getFloatConfig(CONFIG_SPEED_GAME);
++    uint32 speedtime = ((sWorld->GetGameTime() - sWorld->GetUptime()) + (sWorld->GetUptime() * speedrate));
++
+     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 4 + 4 + 4);
+-    data.AppendPackedTime(sWorld->GetGameTime());
+-    data << float(0.01666667f);                             // game speed
+-    data << uint32(0);                                      // added in 3.1.2
++    data.AppendPackedTime(speedtime);
++    data << float(0.01666667f) * speedrate; // game speed
++    data << uint32(0); // added in 3.1.2
+     GetSession()->SendPacket(&data);
+ 
+     GetReputationMgr().SendForceReactions();                // SMSG_SET_FORCED_REACTIONS
+diff --git a/src/server/game/Spells/Spell.cpp b/src/server/game/Spells/Spell.cpp
+index 03f14d1..6409e7c 100644
+--- a/src/server/game/Spells/Spell.cpp
++++ b/src/server/game/Spells/Spell.cpp
+@@ -4681,8 +4681,8 @@ SpellCastResult Spell::CheckCast(bool strict)
+     }
+ 
+     // Check global cooldown
+-    if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
+-        return SPELL_FAILED_NOT_READY;
++        if (strict && !(_triggeredCastFlags & TRIGGERED_IGNORE_GCD) && HasGlobalCooldown())
++            return SPELL_FAILED_NOT_READY;
+ 
+     // only triggered spells can be processed an ended battleground
+     if (!IsTriggered() && m_caster->GetTypeId() == TYPEID_PLAYER)
+diff --git a/src/server/game/Spells/SpellInfo.cpp b/src/server/game/Spells/SpellInfo.cpp
+index ea5e4c8..4500669 100644
+--- a/src/server/game/Spells/SpellInfo.cpp
++++ b/src/server/game/Spells/SpellInfo.cpp
+@@ -25,6 +25,7 @@
+ #include "Battleground.h"
+ #include "Vehicle.h"
+ #include "Pet.h"
++#include "World.h"
+ 
+ uint32 GetTargetFlagMask(SpellTargetObjectTypes objType)
+ {
+@@ -2114,7 +2115,10 @@ uint32 SpellInfo::CalcCastTime(Spell* spell /*= NULL*/) const
+     if (HasAttribute(SPELL_ATTR0_REQ_AMMO) && (!IsAutoRepeatRangedSpell()))
+         castTime += 500;
+ 
+-    return (castTime > 0) ? uint32(castTime) : 0;
++    if (!sWorld->getBoolConfig(CONFIG_NO_CAST_TIME))
++        return (castTime > 0) ? uint32(castTime) : 0;
++    else
++        return 0;
+ }
+ 
+ uint32 SpellInfo::GetMaxTicks() const
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 8476dcc..d34d148 100644
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1123,7 +1123,9 @@ void World::LoadConfigSettings(bool reload)
+     // Prepatch by LordPsyan
+     // 01
+     // 02
+-    // 03
++    m_float_configs[CONFIG_SPEED_GAME] = sConfigMgr->GetFloatDefault("Custom.SpeedGame", 1.0f);
++    m_bool_configs[CONFIG_NO_CAST_TIME] = sConfigMgr->GetBoolDefault("Custom.NoCastTime", false);
++    m_bool_configs[CONFIG_HURT_IN_REAL_TIME] = sConfigMgr->GetBoolDefault("Custom.HurtInRealTime", false);
+     // 04
+     // 05
+     // 06
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 11c527e..d9ade59 100644
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -161,7 +161,8 @@ enum WorldBoolConfigs
+     // Prepatch by LordPsyan
+     // 01
+     // 02
+-    // 03
++    CONFIG_NO_CAST_TIME,
++    CONFIG_HURT_IN_REAL_TIME,
+     // 04
+     // 05
+     // 06
+@@ -208,7 +209,7 @@ enum WorldFloatConfigs
+     // Prepatch by LordPsyan
+     // 21
+     // 22
+-    // 23
++    CONFIG_SPEED_GAME,
+     // 24
+     // 25
+     // 26
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 3aa2d19..d4ebfc0 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3404,6 +3404,35 @@ PacketSpoof.BanDuration = 86400
+ #
+ ###################################################################################################
+ 
++###################################################################################################
++#
++# Custom.SpeedGame
++# Set it to a number upper than 1 to speed up realm timer
++# Default : 1 (Real Time)
++# Example : 60 to force 1scde (real time) = 1 minute (realm timer)
++#
++
++Custom.SpeedGame = 1
++
++#
++# Custom.NoCastTime
++# Set it to 1 to disable cast time
++# Default : 0 (Cast Time Enable)
++#
++
++Custom.NoCastTime = 0
++
++#
++# Custom.HurtInRealTime
++# Set it to 1 to disable autohurt with weapon
++# Default : 0 (Autohurt Enable)
++#
++
++Custom.HurtInRealTime = 0
++
++#
++###################################################################################################
++
+ #
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+-- 
+1.7.10.4
+

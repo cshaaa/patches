@@ -1,0 +1,597 @@
+From c8a59c158a37da1864b80b1b4dcf15036976823a Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Tue, 9 Sep 2014 01:36:33 -0400
+Subject: [PATCH] NPCBuff
+
+---
+ .../npc_buff/world_npc_buff.sql                    |  62 +++
+ src/server/game/Scripting/ScriptLoader.cpp         |   6 +-
+ src/server/scripts/Custom/npcbuff.cpp              | 426 +++++++++++++++++++++
+ src/server/worldserver/worldserver.conf.dist       |  43 +++
+ 4 files changed, 535 insertions(+), 2 deletions(-)
+ create mode 100644 sql/TrinityCore-Patches/npc_buff/world_npc_buff.sql
+ create mode 100644 src/server/scripts/Custom/npcbuff.cpp
+
+diff --git a/sql/TrinityCore-Patches/npc_buff/world_npc_buff.sql b/sql/TrinityCore-Patches/npc_buff/world_npc_buff.sql
+new file mode 100644
+index 0000000..3a970af
+--- /dev/null
++++ b/sql/TrinityCore-Patches/npc_buff/world_npc_buff.sql
+@@ -0,0 +1,62 @@
++DROP TABLE IF EXISTS `npc_buff_spells`;
++
++CREATE TABLE `npc_buff_spells` (
++  `spell_id` int(5) NOT NULL default '0' COMMENT 'Spell entry number',
++  `cat_number` int(5) NOT NULL default '0' COMMENT '0-small buff 1-great buff 2-gm buff 3-player tools',
++  `cost` int(10) NOT NULL default '0' COMMENT 'cost amount in copper',
++  `name` text COMMENT 'Name of spell',
++  PRIMARY KEY  (`spell_id`)
++) ENGINE=MyISAM DEFAULT CHARSET=latin1;
++
++/*Data for the table `npc_buff_spells` */
++
++INSERT INTO `npc_buff_spells` (`spell_id`, `cat_number`, `cost`, `name`) VALUES
++-- Small Buff
++(48469,1001,10000,"Mark of the Wild"),
++(53307,1002,10000,"Thorns"),
++(43017,1003,10000,"Amplify Magic"),
++(42995,1004,10000,"Arcane Intellect"),
++(61024,1005,10000,"Dalaran Intellect"),
++(43015,1006,10000,"Dampen Magic"),
++(20217,1007,10000,"Blessing of Kings"),
++(48932,1008,10000,"Blessing of Might"),
++(48936,1009,10000,"Blessing of Wisdom"),
++(48072,1010,10000,"Divine Spirit"),
++(48161,1011,10000,"Power Word: Fortitude"),
++(48169,1012,10000,"Shadow Protection"),
++-- Great Buff
++(48470,2001,100000,"Gift of the Wild"),
++(43002,2002,100000,"Arcane Brilliance"),
++(61316,2003,100000,"Dalaran Brilliance"),
++(25898,2004,100000,"Greater Blessing of Kings"),
++(48934,2005,100000,"Greater Blessing of Might"),
++(25899,2006,100000,"Greater Blessing of Sanctuary"),
++(48938,2007,100000,"Greater Blessing of Wisdom"),
++(48162,2008,100000,"Prayer of Fortitude"),
++(48170,2009,100000,"Prayer of Shadow Protection"),
++(48074,2010,100000,"Prayer of Spirit"),
++-- GM Buff
++(17013,3001,0,"Agamaggan's Agility"),
++(16612,3002,0,"Agamaggan's Strength"),
++(58453,3003,0,"Armor Magic"),
++(34106,3004,0,"Armor Penetration"),
++(25661,3005,0,"Increased Stamina"),
++(16610,3006,0,"Razorhide"),
++(10767,3007,0,"Rising Spirit"),
++(16618,3008,0,"Spirit of the Wind"),
++(7764,3009,0,"Wisdom of Agamaggan"),
++-- Player Tools
++(46642,4001,0,"Give me Gold"),
++(24827,4002,0,"Give me Soul Shards"),
++(38588,4003,0,"Heal me please"),
++(53251,4004,0,"Heal me and party members Please"),
++(42956,4005,0,"Conjure Refreshment"),
++(42985,4006,0,"Conjure Mana Gem");
++
++DELETE FROM `creature_template` WHERE `entry` = 60002;
++INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `dmgschool`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `DamageModifier`, `ExperienceModifier`, `RacialLeader`, `questItem1`, `questItem2`, `questItem3`, `questItem4`, `questItem5`, `questItem6`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) values
++('60002','0','0','0','0','0','18','0','18','0','LordPsyan','Buffs master','','0','59','61','0','35','1','1.48','1.14286','0','0','0','1500','1900','1','1','1','0','0','0','0','0','0','0','0','7','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','1','3','1','1','1','1','1','1','0','0','0','0','0','0','0','0','1','0','0','npc_buff','1');
++
++REPLACE INTO `npc_text` (`ID`, `text0_0`) VALUES
++   (100002, 'Choose your Buff Type.'),
++   (100003, 'Choose your Buff.');
+\ No newline at end of file
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 5d120b2..e612cd8 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1466,7 +1466,8 @@ void AddBattlegroundScripts()
+ // start30
+ // start31
+ // start32
+-// start33
++// Buff NPC
++void AddSC_Npc_Buff();
+ // start34
+ // start35
+ // start36
+@@ -1552,7 +1553,8 @@ void AddCustomScripts()
+ // end30
+ // end31
+ // end32
+-// end33
++    // Buff NPC
++    AddSC_Npc_Buff();
+ // end34
+ // end35
+ // end36
+diff --git a/src/server/scripts/Custom/npcbuff.cpp b/src/server/scripts/Custom/npcbuff.cpp
+new file mode 100644
+index 0000000..9ecd4f3
+--- /dev/null
++++ b/src/server/scripts/Custom/npcbuff.cpp
+@@ -0,0 +1,426 @@
++/* Copyright (C) 2010 SAMCC Studios <http://www.samccstudios.com/>
++ * Written by LordPsyan
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ */
++
++ /*
++Script Name: npc_buff v1.1
++Complete: 100%
++Comment: Database Driven Buff Master
++*/
++
++#include "ScriptPCH.h"
++#include "Config.h"
++#include "SystemConfig.h"
++
++#define GOSSIP_SENDER_MAIN      1000
++#define GOSSIP_SMALLBUFF        2000
++#define GOSSIP_LARGEBUFF        3000
++#define GOSSIP_GMBUFF           4000
++#define GOSSIP_PLAYERTOOLS      5000
++
++#define SPELL_RESURRECTION_SICKNESS_15007  15007
++
++#define NB_BUFF_PAGE            10
++#define MSG_TYPE                100002
++#define MSG_BUFF                100003
++
++#define NEXT_PAGE               "-> [Next Page]"
++#define PREV_PAGE               "<- [Previous Page]"
++#define MAIN_MENU               "<= [Main Menu]"
++
++class npc_buff : public CreatureScript
++{
++public:
++    npc_buff() : CreatureScript("npc_buff") {}
++
++bool OnGossipHello(Player* pPlayer, Creature* pCreature)
++{
++    if(sConfigMgr->GetBoolDefault("Npc_Buff.OnlyGMs", false)) // If Npc_Buff.OnlyGMs is enabled in worldserver.conf
++        if (pPlayer->GetSession()->GetSecurity() == SEC_PLAYER)
++        {
++            pCreature->Whisper("Sorry, I can only Buff Platinum Members.", LANG_UNIVERSAL, pPlayer);
++            return true;
++        }
++
++    bool EnableSmallBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableSmallBuff", true);
++    bool EnableGreatBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGreatBuff", true);
++    bool EnableGMBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGMBuff", true);
++    bool EnablePlayerTools = sConfigMgr->GetBoolDefault("Npc_Buff.EnablePlayerTools", true);
++    bool EnableResSickness = sConfigMgr->GetBoolDefault("Npc_Buff.EnableRemoveResSickness", true);
++    bool EnableGivemeGold = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGivemeGold", false);
++
++    // Main Menu
++
++    // Check config if "Small  Buff " is enabled or not
++    if(EnableSmallBuff)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Small Buff ->"              , GOSSIP_SENDER_MAIN, 1000);
++    // Check config if "Great Buff" is enabled or not
++    if(EnableGreatBuff)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Great Buff ->"              , GOSSIP_SENDER_MAIN, 2000);
++    // Check config if "GM Buff" is enabled or not
++    if(EnableGMBuff)
++    {
++    if (pPlayer->GetSession()->GetSecurity() > SEC_PLAYER)
++        {
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Platinum Members Buff ->"                 , GOSSIP_SENDER_MAIN, 3000);
++        }
++    }
++    // Check config if "Player Tools" is enabled or not
++    if(EnablePlayerTools)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Player Tools ->"            , GOSSIP_SENDER_MAIN, 4000);
++
++    // Check config file if "Remove res sickness" option is enabled or not
++    if(EnableResSickness)
++        pPlayer->ADD_GOSSIP_ITEM( 10, "Remove Resurrect Sickness" , GOSSIP_SENDER_MAIN, 5000);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_TYPE, pCreature->GetGUID());
++
++return true;
++}
++
++bool showSmallBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
++{
++
++
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 2000 ORDER BY `cat_number` ASC");
++
++ if (result)
++ {
++ std::string name = "";
++ uint32 catNumber = 0;
++  do
++ {
++ Field *fields = result->Fetch();
++ name = fields[0].GetString();
++ catNumber = fields[1].GetInt32();
++
++    pPlayer->ADD_GOSSIP_ITEM(9, name, GOSSIP_SENDER_MAIN, catNumber);
++}
++ while (result->NextRow());
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ pCreature->Whisper("You don't have enough money.", LANG_UNIVERSAL, pPlayer);
++ pPlayer->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showSmallBuff(pPlayer, pCreature, 0);
++ }
++ }
++
++ return false;
++}
++
++bool showGreatBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
++{
++
++
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 3000 AND `cat_number` > 2000 ORDER BY `cat_number` ASC");
++
++ if (result)
++ {
++ std::string name = "";
++ uint32 catNumber = 0;
++  do
++ {
++ Field *fields = result->Fetch();
++ name = fields[0].GetString();
++ catNumber = fields[1].GetInt32();
++
++    pPlayer->ADD_GOSSIP_ITEM(9, name, GOSSIP_SENDER_MAIN, catNumber);
++}
++ while (result->NextRow());
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ pCreature->Whisper("You don't have enough money.", LANG_UNIVERSAL, pPlayer);
++ pPlayer->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showGreatBuff(pPlayer, pCreature, 0);
++ }
++ }
++
++ return false;
++}
++
++bool showGmBuff(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
++{
++
++
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 4000 AND `cat_number` > 3000 ORDER BY `cat_number` ASC");
++
++ if (result)
++ {
++ std::string name = "";
++ uint32 catNumber = 0;
++  do
++ {
++ Field *fields = result->Fetch();
++ name = fields[0].GetString();
++ catNumber = fields[1].GetInt32();
++
++    pPlayer->ADD_GOSSIP_ITEM(9, name, GOSSIP_SENDER_MAIN, catNumber);
++}
++ while (result->NextRow());
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ pCreature->Whisper("You don't have enough money.", LANG_UNIVERSAL, pPlayer);
++ pPlayer->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showGmBuff(pPlayer, pCreature, 0);
++ }
++ }
++
++ return false;
++}
++
++bool showPlayerTools(Player *pPlayer, Creature *pCreature, uint32 showFromId = 0)
++{
++
++
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `name`, `cat_number` FROM `npc_buff_spells` WHERE `cat_number` < 5000 AND `cat_number` > 4000 ORDER BY `cat_number` ASC");
++
++ if (result)
++ {
++ std::string name = "";
++ uint32 catNumber = 0;
++  do
++ {
++ Field *fields = result->Fetch();
++ name = fields[0].GetString();
++ catNumber = fields[1].GetInt32();
++
++    pPlayer->ADD_GOSSIP_ITEM(9, name, GOSSIP_SENDER_MAIN, catNumber);
++}
++ while (result->NextRow());
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ pCreature->Whisper("You don't have enough money.", LANG_UNIVERSAL, pPlayer);
++ pPlayer->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showPlayerTools(pPlayer, pCreature, 0);
++ }
++ }
++
++ return false;
++}
++
++void SendDefaultMenu(Player* pPlayer, Creature* pCreature, uint32 uiAction)
++{
++
++// Not allow in combat
++if (pPlayer->IsInCombat())
++{
++    pPlayer->CLOSE_GOSSIP_MENU();
++    pCreature->Say("You are in combat!", LANG_UNIVERSAL);
++    return;
++}
++
++    bool EnableSmallBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableSmallBuff", true);
++    bool EnableGreatBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGreatBuff", true);
++    bool EnableGMBuff = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGMBuff", true);
++    bool EnablePlayerTools = sConfigMgr->GetBoolDefault("Npc_Buff.EnablePlayerTools", true);
++    bool EnableResSickness = sConfigMgr->GetBoolDefault("Npc_Buff.EnableRemoveResSickness", true);
++    bool EnableGivemeGold = sConfigMgr->GetBoolDefault("Npc_Buff.EnableGivemeGold", false);
++
++//Money Check
++if (pPlayer->GetMoney() < (sConfigMgr->GetFloatDefault("BuffGoldCost",0)))
++{
++    pPlayer->CLOSE_GOSSIP_MENU();
++    pCreature->Whisper("You don't have enough money.", LANG_UNIVERSAL, pPlayer);
++    return;
++}
++
++
++  // send name as gossip item
++
++
++       QueryResult result;
++        uint32 spellId = 0;
++        uint32 catNumber = 0;
++        uint32 goldCost = 0;
++        std::string spellName = "";
++
++        result = WorldDatabase.PQuery("SELECT `spell_id`, `cat_number`, `cost`, `name` FROM `npc_buff_spells` WHERE `cat_number` = %u LIMIT 1", uiAction);
++
++        if (result)
++        {
++
++            do {
++
++            Field *fields = result->Fetch();
++            spellId = fields[0].GetInt32();
++            catNumber = fields[1].GetInt32();
++            goldCost = fields[2].GetInt32();
++            spellName = fields[3].GetString();
++
++            if (pPlayer->GetMoney() < goldCost)
++            {
++                pCreature->Whisper("You dont have enough money!", LANG_UNIVERSAL, pPlayer);
++                pPlayer->CLOSE_GOSSIP_MENU();
++                return;
++            }
++            else if (uiAction < 5000 && uiAction != 1000 && uiAction != 2000 && uiAction != 3000 && uiAction != 4000 && uiAction != 5005)
++            {
++    pPlayer->CLOSE_GOSSIP_MENU();
++    pPlayer->CastSpell(pPlayer,spellId,false);
++    pPlayer->ModifyMoney(-goldCost);
++
++            }
++
++            } while (result->NextRow());
++        } else {
++            //pPlayer->ADD_GOSSIP_ITEM( 7, MAIN_MENU, GOSSIP_SENDER_MAIN, 5005);
++        }
++
++ switch(uiAction)
++{
++
++case 1000: //Small  Buff
++         showSmallBuff(pPlayer, pCreature, 0);
++        //pPlayer->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++break;
++
++case 2000: //Great Buff
++
++
++        showGreatBuff(pPlayer, pCreature, 0);
++        //pPlayer->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF, pCreature->GetGUID());
++break;
++
++case 3000: //GM  Buff
++
++        showGmBuff(pPlayer, pCreature, 0);
++        //pPlayer->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF,pCreature->GetGUID());
++break;
++
++case 4000: //Player Tools
++    // Check config if "Give me Gold" is enabled or not
++
++        showPlayerTools(pPlayer, pCreature, 0);
++        //pPlayer->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_BUFF,pCreature->GetGUID());
++break;
++
++case 5005: //Back To Main Menu
++    // Main Menu
++    // Check config if "Small  Buff " is enabled or not
++    if(EnableSmallBuff)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Small Buff ->"              , GOSSIP_SMALLBUFF, 1000);
++    // Check config if "Great Buff" is enabled or not
++    if(EnableGreatBuff)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Great Buff ->"              , GOSSIP_LARGEBUFF, 2000);
++    // Check config if "GM Buff" is enabled or not
++    if(EnableGMBuff)
++    {
++    if (pPlayer->GetSession()->GetSecurity() > SEC_PLAYER)
++        {
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Platinum Members Buff ->"                 , GOSSIP_SENDER_MAIN, 3000);
++        }
++    }
++    // Check config if "Player Tools" is enabled or not
++    if(EnablePlayerTools)
++        pPlayer->ADD_GOSSIP_ITEM( 7, "Player Tools ->"            , GOSSIP_PLAYERTOOLS, 4000);
++    // Check if Ress Sickness option is enabled
++    if(EnableResSickness)
++        pPlayer->ADD_GOSSIP_ITEM( 10, "Remove Resurrect Sickness" , GOSSIP_SENDER_MAIN, 5000);
++
++    pPlayer->SEND_GOSSIP_MENU(MSG_TYPE, pCreature->GetGUID());
++break;
++
++case 5000://Remove Res Sickness
++    if(!pPlayer->HasAura(SPELL_RESURRECTION_SICKNESS_15007))
++    {
++        pCreature->Whisper("You don't have resurrection sickness.", LANG_UNIVERSAL, pPlayer);
++        OnGossipHello(pPlayer, pCreature);
++        return;
++    }
++
++    pCreature->CastSpell(pPlayer,38588,false); // Healing effect
++    pPlayer->RemoveAurasDueToSpell(SPELL_RESURRECTION_SICKNESS_15007);
++    pPlayer->CLOSE_GOSSIP_MENU();
++break;
++ pPlayer->CLOSE_GOSSIP_MENU();
++ }
++
++} //end of function
++
++bool OnGossipSelect(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
++{
++    // Main menu
++    pPlayer->PlayerTalkClass->ClearMenus();
++    if (uiSender == GOSSIP_SENDER_MAIN)
++    SendDefaultMenu(pPlayer, pCreature, uiAction);
++
++return true;
++}
++};
++void AddSC_Npc_Buff()
++{
++    new npc_buff();
++}
+\ No newline at end of file
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 9097e0b..cde398a 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3217,6 +3217,49 @@ PacketSpoof.BanDuration = 86400
+ #
+ ###################################################################################################
+ 
++###################################################################################################
++#
++# NPC Buff rewritten by LordPsyan
++#
++#        GM Only
++#         Default 0 = Any Player
++#                 1 = GM1 or higher
++
++Npc_Buff.OnlyGMs = 0
++
++#     Enables Small Buff
++#         Default 0 = Disable
++#                 1 = Enable
++
++Npc_Buff.EnableSmallBuff = 1
++
++#     Enables Geat Buff
++#         Default 0 = Disable
++#                 1 = Enable
++
++Npc_Buff.EnableGreatBuff = 1
++
++#     Enables GM Only Buff
++#         Default 0 = Disable
++#                 1 = Enable
++
++Npc_Buff.EnableGMBuff = 1
++
++#     Enables Player Tools
++#         Default 0 = Disable
++#                 1 = Enable
++
++Npc_Buff.EnablePlayerTools = 1
++
++#     Enables Remove Res Sickness
++#         Default 0 = Disable
++#                 1 = Enable
++
++Npc_Buff.EnableRemoveResSickness = 1
++
++#
++###################################################################################################
++
+ #
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+-- 
+2.1.0.rc1
+

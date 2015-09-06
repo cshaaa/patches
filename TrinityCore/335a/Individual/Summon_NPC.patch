@@ -1,0 +1,103 @@
+From f1fd90b0cced5170356368dce0fc6a818c008c45 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Fri, 29 Aug 2014 08:47:01 -0400
+Subject: [PATCH] Summon_NPC
+
+---
+ .../SummonNPC/world.summonnpc-item.sql             |  4 ++
+ src/server/game/Scripting/ScriptLoader.cpp         |  6 ++-
+ src/server/scripts/Custom/summon.cpp               | 46 ++++++++++++++++++++++
+ 3 files changed, 54 insertions(+), 2 deletions(-)
+ create mode 100644 sql/TrinityCore-Patches/SummonNPC/world.summonnpc-item.sql
+ create mode 100644 src/server/scripts/Custom/summon.cpp
+
+diff --git a/sql/TrinityCore-Patches/SummonNPC/world.summonnpc-item.sql b/sql/TrinityCore-Patches/SummonNPC/world.summonnpc-item.sql
+new file mode 100644
+index 0000000..695b845
+--- /dev/null
++++ b/sql/TrinityCore-Patches/SummonNPC/world.summonnpc-item.sql
+@@ -0,0 +1,4 @@
++-- Example item:
++DELETE FROM `item_template` WHERE `entry` = 100000;
++insert into `item_template` (`entry`, `class`, `subclass`, `SoundOverrideSubclass`, `name`, `displayid`, `Quality`, `Flags`, `FlagsExtra`, `BuyCount`, `BuyPrice`, `SellPrice`, `InventoryType`, `AllowableClass`, `AllowableRace`, `ItemLevel`, `RequiredLevel`, `RequiredSkill`, `RequiredSkillRank`, `requiredspell`, `requiredhonorrank`, `RequiredCityRank`, `RequiredReputationFaction`, `RequiredReputationRank`, `maxcount`, `stackable`, `ContainerSlots`, `StatsCount`, `stat_type1`, `stat_value1`, `stat_type2`, `stat_value2`, `stat_type3`, `stat_value3`, `stat_type4`, `stat_value4`, `stat_type5`, `stat_value5`, `stat_type6`, `stat_value6`, `stat_type7`, `stat_value7`, `stat_type8`, `stat_value8`, `stat_type9`, `stat_value9`, `stat_type10`, `stat_value10`, `ScalingStatDistribution`, `ScalingStatValue`, `dmg_min1`, `dmg_max1`, `dmg_type1`, `dmg_min2`, `dmg_max2`, `dmg_type2`, `armor`, `holy_res`, `fire_res`, `nature_res`, `frost_res`, `shadow_res`, `arcane_res`, `delay`, `ammo_type`, `RangedModRange`, `spellid_1`, `spelltrigger_1`, `spellcharges_1`, `spellppmRate_1`, `spellcooldown_1`, `spellcategory_1`, `spellcategorycooldown_1`, `spellid_2`, `spelltrigger_2`, `spellcharges_2`, `spellppmRate_2`, `spellcooldown_2`, `spellcategory_2`, `spellcategorycooldown_2`, `spellid_3`, `spelltrigger_3`, `spellcharges_3`, `spellppmRate_3`, `spellcooldown_3`, `spellcategory_3`, `spellcategorycooldown_3`, `spellid_4`, `spelltrigger_4`, `spellcharges_4`, `spellppmRate_4`, `spellcooldown_4`, `spellcategory_4`, `spellcategorycooldown_4`, `spellid_5`, `spelltrigger_5`, `spellcharges_5`, `spellppmRate_5`, `spellcooldown_5`, `spellcategory_5`, `spellcategorycooldown_5`, `bonding`, `description`, `PageText`, `LanguageID`, `PageMaterial`, `startquest`, `lockid`, `Material`, `sheath`, `RandomProperty`, `RandomSuffix`, `block`, `itemset`, `MaxDurability`, `area`, `Map`, `BagFamily`, `TotemCategory`, `socketColor_1`, `socketContent_1`, `socketColor_2`, `socketContent_2`, `socketColor_3`, `socketContent_3`, `socketBonus`, `GemProperties`, `RequiredDisenchantSkill`, `ArmorDamageModifier`, `duration`, `ItemLimitCategory`, `HolidayId`, `ScriptName`, `DisenchantID`, `FoodType`, `minMoneyLoot`, `maxMoneyLoot`, `flagsCustom`, `VerifiedBuild`) values
++('100000','15','0','-1','Icerune','46787','4','72','0','1','0','0','0','-1','-1','1','1','0','0','0','0','0','0','6','1','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','18282','0','0','0','8000','0','-1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','|cff00FF00Use: Summons Lithathrad Teleporter.|r','0','0','0','0','0','3','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','0','0','summon','0','0','0','0','0','-4');
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 5d120b2..3a36a45 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1482,7 +1482,8 @@ void AddBattlegroundScripts()
+ // start46
+ // start47
+ // start48
+-// start49
++// IceRune
++void AddSC_summon();
+ // start50
+ // start51
+ // start52
+@@ -1568,7 +1569,8 @@ void AddCustomScripts()
+ // end46
+ // end47
+ // end48
+-// end49
++    // IceRune
++    AddSC_summon();
+ // end50
+ // end51
+ // end52
+diff --git a/src/server/scripts/Custom/summon.cpp b/src/server/scripts/Custom/summon.cpp
+new file mode 100644
+index 0000000..ce7ea24
+--- /dev/null
++++ b/src/server/scripts/Custom/summon.cpp
+@@ -0,0 +1,46 @@
++#include "ScriptPCH.h"
++
++class summon : public ItemScript
++{
++        public:
++                summon() : ItemScript("summon")
++                {
++                }
++                bool OnUse(Player* pPlayer, Item* pItem, SpellCastTargets const& /*targets*/)
++                {
++   uint32 sSpell = 18282; //Icerune Visual Spell when used
++   if (pPlayer->IsInCombat())
++   {
++        pPlayer->GetSession()->SendNotification("You are in combat.");
++   }
++
++   else if (pPlayer->isMoving())
++   {
++        pPlayer->GetSession()->SendNotification("You can not do that while moving.");
++   }
++
++   else if (pPlayer->FindNearestCreature(80410, 40) || pPlayer->FindNearestCreature(100000, 8))
++   {
++        pPlayer->GetSession()->SendNotification("Teleportercan not be summoned because another Teleporter is within range.");
++   }
++
++   else
++   {
++        float x, y, z, o = pPlayer->GetOrientation();
++
++        if (o >= 3.141592)
++         o = o - 3.141592;
++        else
++         o = o + 3.141592;
++        pPlayer->GetClosePoint(x, y, z, pPlayer->GetObjectSize());
++        Creature* pCreature = pPlayer->SummonCreature(100000, x, y, z+2.2, o, TEMPSUMMON_TIMED_DESPAWN, 50000);
++        pCreature->CastSpell(pCreature, 63660);
++        return false;
++   }
++  return false;
++                }
++};
++void AddSC_summon()
++{
++        new summon();
++}
+\ No newline at end of file
+-- 
+2.1.0.rc1
+

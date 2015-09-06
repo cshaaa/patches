@@ -1,0 +1,541 @@
+From 4ffd3a34217fe2625220f669957363be395e6005 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Sat, 5 Sep 2015 16:28:25 -0500
+Subject: [PATCH] Beastmaster
+
+---
+ .../beastmaster/world-beastmaster.sql              |   65 ++++
+ src/server/game/Scripting/ScriptLoader.cpp         |    6 +-
+ src/server/scripts/Custom/beastmaster.cpp          |  383 ++++++++++++++++++++
+ src/server/worldserver/worldserver.conf.dist       |   29 ++
+ 4 files changed, 481 insertions(+), 2 deletions(-)
+ create mode 100644 sql/TrinityCore-Patches/beastmaster/world-beastmaster.sql
+ create mode 100644 src/server/scripts/Custom/beastmaster.cpp
+
+diff --git a/sql/TrinityCore-Patches/beastmaster/world-beastmaster.sql b/sql/TrinityCore-Patches/beastmaster/world-beastmaster.sql
+new file mode 100644
+index 0000000..45c837a
+--- /dev/null
++++ b/sql/TrinityCore-Patches/beastmaster/world-beastmaster.sql
+@@ -0,0 +1,65 @@
++DROP TABLE IF EXISTS `beastmaster`;
++
++CREATE TABLE `beastmaster` (
++  `entry` INT(5) NOT NULL DEFAULT '0' COMMENT 'Pet entry number',
++  `cat_number` INT(5) NOT NULL DEFAULT '0' COMMENT '0-normal pet 1-exotic pet 2-pet spell',
++  `tokenOrGold` TINYINT(1) DEFAULT '0' COMMENT '0 = gold 1 = token',
++  `cost` INT(10) NOT NULL DEFAULT '0' COMMENT 'Amount in copper if tokenOrGold is 0 else number of tokens',
++  `token` INT(10) NOT NULL DEFAULT '0' COMMENT 'Token entry number (item_template.entry)',
++  `name` VARCHAR(255) DEFAULT NULL COMMENT 'Name of pet or name of pet spell',
++  `spell` INT(10) NOT NULL DEFAULT '0' COMMENT 'Spell entry number.',
++  PRIMARY KEY (`entry`)
++) ENGINE=INNODB DEFAULT CHARSET=utf8 COMMENT='Beastmaster System by LordPsyan';
++
++/*Data for the table `beastmaster` */
++
++INSERT INTO `beastmaster` (`entry`, `cat_number`, `tokenOrGold`, `cost`, `token`, `name`, `spell`) VALUES
++('1','0','1','1000','0','Spider','2349'),
++('2','0','0','1000','0','Bat','28233'),
++('3','0','0','1000','0','Bear','29319'),
++('4','0','0','1000','0','Boar','29996'),
++('5','0','0','1000','0','Cat','28097'),
++('6','0','0','1000','0','Carrion Bird','26838'),
++('7','0','0','1000','0','Crab','24478'),
++('8','0','0','1000','0','Crocolisk','1417'),
++('9','0','0','1000','0','Dragonhawk','27946'),
++('10','0','0','1000','0','Gorilla','28213'),
++('11','0','0','1000','0','Hyena','13036'),
++('12','0','0','1000','0','Moth','27421'),
++('13','0','0','1000','0','Owl','23136'),
++('14','0','0','1000','0','Raveger','17199'),
++('15','0','0','1000','0','Raptor','14821'),
++('16','0','0','1000','0','Serpent','28358'),
++('17','0','0','1000','0','Bug','28085'),
++('18','0','0','1000','0','Strider','22807'),
++('19','0','0','1000','0','Scorpid','9698'),
++('20','1','0','1000','0','Chimaera','21879'),
++('21','1','0','1000','0','Core Hound','21108'),
++('22','1','0','1000','0','Devilsaur','20931'),
++('23','1','0','1000','0','Rhino','30445'),
++('24','1','0','1000','0','Silithid','5460'),
++('25','1','0','1000','0','Worm','30148'),
++('26','1','0','1000','0','Loque\'nahak','32517'),
++('27','1','0','1000','0','Skoll','35189'),
++('28','1','0','1000','0','Gondria','33776'),
++('29','2','1','1000','0','Feed Pet','6991'),
++('30','2','0','1000','0','Call Pet','883'),
++('31','2','0','1000','0','Dismiss Pet','2641'),
++('32','2','0','1000','0','Mend Pet','136'),
++('33','2','0','1000','0','Revive Pet','982');
++
++-- Beastmaster NPC
++
++DELETE FROM `creature_template` WHERE `entry` = 99990;
++
++INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `modelid1`, `modelid2`, `modelid3`, `modelid4`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `scale`, `rank`, `dmgschool`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `trainer_type`, `trainer_spell`, `trainer_class`, `trainer_race`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `resistance1`, `resistance2`, `resistance3`, `resistance4`, `resistance5`, `resistance6`, `spell1`, `spell2`, `spell3`, `spell4`, `spell5`, `spell6`, `spell7`, `spell8`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `InhabitType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `DamageModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `mechanic_immune_mask`, `flags_extra`, `ScriptName`, `VerifiedBuild`) values
++('99990','0','0','0','0','0','26789','0','0','0','LordPsyan','Beastmaster Service','','0','80','80','0','35','129','1','1.14286','0.75','1','0','1500','0','1','1','1','0','0','0','0','0','0','0','0','7','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','','0','3','1','1','1','1','1','1','0','0','1','0','0','Npc_Beastmaster','0');
++
++-- Sample npc vendor data for beastmaster
++
++DELETE FROM `npc_vendor` WHERE `entry` = 99990;
++
++INSERT INTO `npc_vendor` (`entry`, `slot`, `item`, `maxcount`, `incrtime`, `ExtendedCost`) VALUES
++('99990','0','4540','0','0','0'),
++('99990','0','4541','0','0','0'),
++('99990','0','4542','0','0','0');
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index 7e5f73a..4f67cec 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1423,7 +1423,8 @@ void AddBattlegroundScripts()
+ // start06
+ // start07
+ // start08
+-// start09
++// Beastmaster
++void AddSC_Npc_Beastmaster();
+ // start10
+ // start11
+ // start12
+@@ -1549,7 +1550,8 @@ void AddCustomScripts()
+ // end06
+ // end07
+ // end08
+-// end09
++    // Beastmaster
++    AddSC_Npc_Beastmaster();
+ // end10
+ // end11
+ // end12
+diff --git a/src/server/scripts/Custom/beastmaster.cpp b/src/server/scripts/Custom/beastmaster.cpp
+new file mode 100644
+index 0000000..c7fd003
+--- /dev/null
++++ b/src/server/scripts/Custom/beastmaster.cpp
+@@ -0,0 +1,383 @@
++//Modified by Marcus rewritten by LordPsyan
++//original script created by ??
++#include "Config.h"
++#include "Pet.h"
++
++#define GOSSIP_SENDER_MAIN      1000
++#define MSG_TYPE                100004
++#define MSG_PET                 100005
++#define MAIN_MENU               "<= [Main Menu]"
++
++class Npc_Beastmaster : public CreatureScript
++{
++public:
++        Npc_Beastmaster() : CreatureScript("Npc_Beastmaster") { }
++
++void CreatePet(Player *player, Creature * m_creature, uint32 entry) {
++
++    if(sConfigMgr->GetBoolDefault("BeastMaster.OnlyHunter", false)) // Checks to see if Only Hunters can have pets.
++     {
++        if(player->getClass() != CLASS_HUNTER) {
++            m_creature->Whisper("You are not a Hunter!", LANG_UNIVERSAL, player);
++            return;
++        }
++     }
++
++    if(player->GetPet()) {
++        m_creature->Whisper("First you must abandon your Pet!", LANG_UNIVERSAL, player);
++        return;
++    }
++
++    Creature *creatureTarget = m_creature->SummonCreature(entry, player->GetPositionX(), player->GetPositionY()+2, player->GetPositionZ(), player->GetOrientation(), TEMPSUMMON_CORPSE_TIMED_DESPAWN, 500);
++    if(!creatureTarget) return;
++
++    Pet* pet = player->CreateTamedPetFrom(creatureTarget, 0);
++
++    if(!pet) return;
++
++        // kill original creature
++    creatureTarget->setDeathState(JUST_DIED);
++    creatureTarget->RemoveCorpse();
++    creatureTarget->SetHealth(0);                       // just for nice GM-mode view
++
++    pet->SetPower(POWER_HAPPINESS, 1048000);
++
++    // prepare visual effect for levelup
++    pet->SetUInt32Value(UNIT_FIELD_LEVEL, player->getLevel() - 1);
++    pet->GetMap()->AddToMap((Creature*)pet);
++        // visual effect for levelup
++    pet->SetUInt32Value(UNIT_FIELD_LEVEL, player->getLevel());
++
++    if(!pet->InitStatsForLevel(player->getLevel()))
++        TC_LOG_ERROR("scripts", "Pet Create fail: no init stats for entry %u", entry);
++        pet->UpdateAllStats();
++
++    // caster have pet now
++        player->SetMinion(pet, true);
++
++        pet->SavePetToDB(PET_SAVE_AS_CURRENT);
++        pet->InitTalentForLevel();
++        player->PetSpellInitialize();
++    //end
++        player->CLOSE_GOSSIP_MENU();
++        m_creature->Whisper("Pet added. You might want to feed it and name it somehow.", LANG_UNIVERSAL, player);
++        return;
++    }
++
++bool OnGossipHello(Player* player, Creature* m_creature)
++{
++    bool EnableNormalPet = sConfigMgr->GetBoolDefault("BeastMaster.EnableNormalPet", true);
++    bool EnableExoticPet = sConfigMgr->GetBoolDefault("BeastMaster.EnableExoticPet", true);
++
++    // Main Menu
++
++    // Check config if "Normal Pet " is enabled or not
++    if(EnableNormalPet)
++        player->ADD_GOSSIP_ITEM( 7, "Normal Pets ->"              , GOSSIP_SENDER_MAIN, 1000);
++    // Check if player can have an exotic pet, and check config if "Exotic" is enabled or not
++    if(player->CanTameExoticPets() && EnableExoticPet)
++        player->ADD_GOSSIP_ITEM( 7, "Exotic Pets ->"              , GOSSIP_SENDER_MAIN, 2000);
++    // Now to add the spells, vendor, and stable stuffs
++    player->ADD_GOSSIP_ITEM(4, "Teach Me Pet spells ->"      , GOSSIP_SENDER_MAIN, 3000);
++    player->ADD_GOSSIP_ITEM(2, "Take me to the Stable.", GOSSIP_SENDER_MAIN, 6006);
++    player->ADD_GOSSIP_ITEM(6, "Sell me some Food for my Pet.", GOSSIP_SENDER_MAIN, 6007);
++    player->SEND_GOSSIP_MENU(MSG_TYPE, m_creature->GetGUID());
++return true;
++}
++
++bool showNormalPet(Player *player, Creature *m_creature, uint32 showFromId = 0)
++{
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `entry`, `name` FROM `beastmaster` WHERE `cat_number` = 0 ORDER BY `entry` ASC");
++
++ if (result)
++ {
++ uint32 entryNum = 0;
++ std::string petName = "";
++ uint8 tokenOrGold = 0;
++ uint32 price = 0;
++ uint32 nToken = 0;
++
++  do
++ {
++ Field *fields = result->Fetch();
++ entryNum = fields[0].GetInt32();
++ petName = fields[1].GetString();
++
++    player->ADD_GOSSIP_ITEM(9, petName, GOSSIP_SENDER_MAIN, entryNum);
++}
++ while (result->NextRow());
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ m_creature->Whisper("You don't have enough money.", LANG_UNIVERSAL, player);
++ player->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showNormalPet(player, m_creature, 0);
++ }
++ }
++
++ return false;
++}
++
++bool showExoticPet(Player *player, Creature *m_creature, uint32 showFromId = 0)
++{
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `entry`, `name` FROM `beastmaster` WHERE `cat_number` = 1 ORDER BY `entry` ASC");
++
++ if (result)
++ {
++ uint32 entryNum = 0;
++ std::string petName = "";
++  do
++ {
++ Field *fields = result->Fetch();
++ entryNum = fields[0].GetInt32();
++ petName = fields[1].GetString();
++
++    player->ADD_GOSSIP_ITEM(9, petName, GOSSIP_SENDER_MAIN, entryNum);
++}
++ while (result->NextRow());
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ //m_creature->Whisper("You don't have enough money.", LANG_UNIVERSAL, player);
++ //player->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showExoticPet(player, m_creature, 0);
++ }
++ }
++
++ return false;
++}
++
++bool showPetSpells(Player *player, Creature *m_creature, uint32 showFromId = 0)
++{
++ QueryResult result;
++ result = WorldDatabase.PQuery("SELECT `entry`, `name` FROM `beastmaster` WHERE `cat_number` = 2 ORDER BY `entry` ASC");
++
++ if (result)
++ {
++ uint32 entryNum = 0;
++ std::string petName = "";
++ uint8 tokenOrGold = 0;
++ uint32 price = 0;
++ uint32 nToken = 0;
++
++  do
++ {
++ Field *fields = result->Fetch();
++ entryNum = fields[0].GetInt32();
++ petName = fields[1].GetString();
++
++    player->ADD_GOSSIP_ITEM(9, petName, GOSSIP_SENDER_MAIN, entryNum);
++}
++ while (result->NextRow());
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++ return true;
++ }
++ else
++ {
++ if (showFromId = 0)
++ {
++ //you are too poor
++ m_creature->Whisper("You don't have enough money.", LANG_UNIVERSAL, player);
++ player->CLOSE_GOSSIP_MENU();
++ }
++ else
++ {
++
++ //show Spells from beginning
++ showPetSpells(player, m_creature, 0);
++ }
++ }
++
++ return false;
++}
++
++void SendDefaultMenu(Player* player, Creature* m_creature, uint32 uiAction)
++{
++
++// Not allow in combat
++if (player->IsInCombat())
++{
++    player->CLOSE_GOSSIP_MENU();
++    m_creature->Say("You are in combat!", LANG_UNIVERSAL);
++    return;
++}
++
++    bool EnableNormalPet = sConfigMgr->GetBoolDefault("BeastMaster.EnableNormalPet", true);
++    bool EnableExoticPet = sConfigMgr->GetBoolDefault("BeastMaster.EnableExoticPet", true);
++
++  // send name as gossip item
++       QueryResult result;
++        uint32 spellId = 0;
++        uint32 catNumber = 0;
++        uint32 cost = 0;
++        std::string spellName = "";
++        uint32 token = 0;
++        bool tokenOrGold = true;
++
++        result = WorldDatabase.PQuery("SELECT * FROM `beastmaster` WHERE `entry` = %u LIMIT 1", uiAction);
++
++if (result)
++{
++    do {
++        Field *fields = result->Fetch();
++        catNumber = fields[1].GetInt32();
++        tokenOrGold = fields[2].GetBool();
++        cost = fields[3].GetInt32();
++        token = fields[4].GetInt32();
++        spellName = fields[5].GetString();
++        spellId = fields[6].GetInt32();
++
++        if (tokenOrGold)
++        {
++            if (!player->HasItemCount(token, cost))
++                {
++                    m_creature->Whisper("You ain't gots no darn chips.", LANG_UNIVERSAL, player);
++                    player->CLOSE_GOSSIP_MENU();
++                    return;
++                }
++            else if (uiAction != 1000 && uiAction != 2000 && uiAction != 3000 && catNumber != 2)
++            {
++    player->CLOSE_GOSSIP_MENU();
++    CreatePet(player, m_creature, spellId);
++    player->DestroyItemCount(token, cost, true);
++            }
++            else if (catNumber = 2)
++            {
++            if (player->HasSpell(spellId))
++            {
++                m_creature->Whisper("You already know this spell.", LANG_UNIVERSAL, player);
++                player->CLOSE_GOSSIP_MENU();
++                return;
++            } else {
++    player->CLOSE_GOSSIP_MENU();
++    player->LearnSpell(spellId, false);
++    player->DestroyItemCount(token, cost, true);
++            }
++        }
++
++        } else {
++            if (player->GetMoney() < cost)
++            {
++                m_creature->Whisper("You dont have enough money!", LANG_UNIVERSAL, player);
++                player->CLOSE_GOSSIP_MENU();
++                return;
++            }
++        else if (uiAction != 1000 && uiAction != 2000 && uiAction != 3000 && catNumber != 2)
++        {
++    player->CLOSE_GOSSIP_MENU();
++    CreatePet(player, m_creature, spellId);
++    player->ModifyMoney(-int(cost));
++        }
++        else if (catNumber = 2)
++        {
++            if (player->HasSpell(spellId))
++            {
++                m_creature->Whisper("You already know this spell.", LANG_UNIVERSAL, player);
++                player->CLOSE_GOSSIP_MENU();
++                return;
++            } else {
++    player->CLOSE_GOSSIP_MENU();
++    player->LearnSpell(spellId, false);
++    player->ModifyMoney(-int(cost));
++            }
++        }
++    }
++} while (result->NextRow());
++} else {
++//player->ADD_GOSSIP_ITEM( 7, MAIN_MENU, GOSSIP_SENDER_MAIN, 5005);
++}
++
++ switch(uiAction)
++{
++
++case 1000: //Normal Pet
++        showNormalPet(player, m_creature, 0);
++        player->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++break;
++
++case 2000: //Exotic Pet
++        showExoticPet(player, m_creature, 0);
++        player->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++break;
++
++case 3000: //Pet Spells
++        showPetSpells(player, m_creature, 0);
++        player->ADD_GOSSIP_ITEM( 7, "<- Main Menu"                            , GOSSIP_SENDER_MAIN, 5005);
++
++    player->SEND_GOSSIP_MENU(MSG_PET, m_creature->GetGUID());
++break;
++
++case 5005: //Back To Main Menu
++    // Main Menu
++    // Check config if "Normal Pet " is enabled or not
++    if(EnableNormalPet)
++        player->ADD_GOSSIP_ITEM( 7, "Normal Pets ->"              , GOSSIP_SENDER_MAIN, 1000);
++    // Check if player can have an exotic pet, and check config if "Exotic" is enabled or not
++    if(player->CanTameExoticPets() && EnableExoticPet)
++        player->ADD_GOSSIP_ITEM( 7, "Exotic Pets ->"              , GOSSIP_SENDER_MAIN, 2000);
++    // Now to add the spells, vendor, and stable stuffs
++    player->ADD_GOSSIP_ITEM(4, "Teach Me Pet spells ->"      , GOSSIP_SENDER_MAIN, 3000);
++    player->ADD_GOSSIP_ITEM(2, "Take me to the Stable.", GOSSIP_SENDER_MAIN, 6006);
++    player->ADD_GOSSIP_ITEM(6, "Sell me some Food for my Pet.", GOSSIP_SENDER_MAIN, 6007);
++    player->SEND_GOSSIP_MENU(MSG_TYPE, m_creature->GetGUID());
++break;
++
++case 6006:
++    player->GetSession()->SendStablePet(m_creature->GetGUID());
++    player->CLOSE_GOSSIP_MENU();
++    break;
++
++case 6007:
++    player->GetSession()->SendListInventory(m_creature->GetGUID());
++    player->CLOSE_GOSSIP_MENU();
++    break;
++
++ player->CLOSE_GOSSIP_MENU();
++ }
++
++} //end of function
++
++bool OnGossipSelect(Player* player, Creature* m_creature, uint32 uiSender, uint32 uiAction)
++{
++    // Main menu
++    player->PlayerTalkClass->ClearMenus();
++    if (uiSender == GOSSIP_SENDER_MAIN)
++    SendDefaultMenu(player, m_creature, uiAction);
++
++return true;
++}
++};
++
++void AddSC_Npc_Beastmaster()
++{
++    new Npc_Beastmaster();
++}
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 3aa2d19..6acca2a 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3404,6 +3404,35 @@ PacketSpoof.BanDuration = 86400
+ #
+ ###################################################################################################
+ 
++###################################################################################################
++#
++# BeastMaster Configuration
++#
++# BeastMaster Hunter Only
++#                 = 0 (Anyone can use)
++#         default = 1 (Hunter only)
++
++BeastMaster.OnlyHunter = 1
++
++#
++# BeastMaster Enable Normal Pets
++#                 = 0  (Normal pets disabled)
++#         default = 1  (Normal Pets enabled)
++#
++
++BeastMaster.EnableNormalPet = 1
++
++#
++# BeastMaster Enable Exotic Pets
++#                 = 0  (Anyone Can get Exotic pets)
++#         default = 1  (Can only get Exotic Pets if you know how)
++#
++
++BeastMaster.EnableExoticPet = 1
++
++#
++###################################################################################################
++
+ #
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+-- 
+1.7.10.4
+

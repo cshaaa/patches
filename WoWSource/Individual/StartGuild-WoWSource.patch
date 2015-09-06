@@ -1,0 +1,83 @@
+From 8122005bf252f4ff66536992d69e625fc563daf4 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Sat, 5 Sep 2015 16:14:36 -0500
+Subject: [PATCH] StartGuild
+
+---
+ src/server/game/Scripting/ScriptLoader.cpp      |    4 ++++
+ src/server/game/Scripting/ScriptMgr.h           |    2 +-
+ src/server/scripts/Custom/gon_playerscripts.cpp |   28 +++++++++++++++++++++++
+ 3 files changed, 33 insertions(+), 1 deletion(-)
+ create mode 100644 src/server/scripts/Custom/gon_playerscripts.cpp
+
+diff --git a/src/server/game/Scripting/ScriptLoader.cpp b/src/server/game/Scripting/ScriptLoader.cpp
+index ed4e18d..edc7836 100644
+--- a/src/server/game/Scripting/ScriptLoader.cpp
++++ b/src/server/game/Scripting/ScriptLoader.cpp
+@@ -1596,11 +1596,15 @@ void AddBattlegroundScripts()
+ 
+ #ifdef SCRIPTS
+ /* This is where custom scripts' loading functions should be declared. */
++// Start Guild
++    void AddSC_gon_playerscripts();
+ #endif
+ 
+ void AddCustomScripts()
+ {
+ #ifdef SCRIPTS
+     /* This is where custom scripts should be added. */
++// Start Guild
++AddSC_gon_playerscripts();
+ #endif
+ }
+diff --git a/src/server/game/Scripting/ScriptMgr.h b/src/server/game/Scripting/ScriptMgr.h
+index 7862006..a3dde96 100644
+--- a/src/server/game/Scripting/ScriptMgr.h
++++ b/src/server/game/Scripting/ScriptMgr.h
+@@ -735,7 +735,7 @@ class PlayerScript : public UnitScript
+         virtual void OnSpellCast(Player* /*player*/, Spell* /*spell*/, bool /*skipCheck*/) { }
+ 
+         // Called when a player logs in.
+-        virtual void OnLogin(Player* /*player*/) { }
++        void OnLogin(Player* /*player*/) { }
+ 
+         // Called when a player logs out.
+         virtual void OnLogout(Player* /*player*/) { }
+diff --git a/src/server/scripts/Custom/gon_playerscripts.cpp b/src/server/scripts/Custom/gon_playerscripts.cpp
+new file mode 100644
+index 0000000..1795ab9
+--- /dev/null
++++ b/src/server/scripts/Custom/gon_playerscripts.cpp
+@@ -0,0 +1,28 @@
++#include "ScriptMgr.h"
++#include "Player.h"
++#include "GuildMgr.h"
++
++#define GUILD_ID_ALLIANCE 45 //Guild ID
++#define GUILD_ID_HORDE   46 //Guild ID
++
++class gon_playerscripts : public PlayerScript
++{
++    public:
++        gon_playerscripts() : PlayerScript("gon_playerscripts") { }
++
++   void OnLogin(Player* player, bool firstLogin)
++    {
++        if (firstLogin)
++        {
++            Guild* guild = sGuildMgr->GetGuildById(player->GetTeam() == ALLIANCE ? GUILD_ID_ALLIANCE : GUILD_ID_HORDE);
++
++            if (guild)
++                guild->AddMember(player->GetGUID());
++        }
++    }
++};
++
++void AddSC_gon_playerscripts()
++{
++    new gon_playerscripts();
++}
+\ No newline at end of file
+-- 
+1.7.10.4
+

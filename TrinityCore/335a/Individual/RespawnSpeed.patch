@@ -1,0 +1,77 @@
+From 149b24c8f7f5dc5edddd8c0c85ee18677f5ebf84 Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Tue, 9 Sep 2014 01:44:59 -0400
+Subject: [PATCH] RespawnSpeed
+
+---
+ src/server/game/Entities/Creature/Creature.cpp |  2 +-
+ src/server/game/World/World.cpp                |  2 +-
+ src/server/game/World/World.h                  |  2 +-
+ src/server/worldserver/worldserver.conf.dist   | 12 ++++++++++++
+ 4 files changed, 15 insertions(+), 3 deletions(-)
+
+diff --git a/src/server/game/Entities/Creature/Creature.cpp b/src/server/game/Entities/Creature/Creature.cpp
+index ba94a99..8f1312a 100644
+--- a/src/server/game/Entities/Creature/Creature.cpp
++++ b/src/server/game/Entities/Creature/Creature.cpp
+@@ -1452,7 +1452,7 @@ void Creature::setDeathState(DeathState s)
+     if (s == JUST_DIED)
+     {
+         m_corpseRemoveTime = time(NULL) + m_corpseDelay;
+-        m_respawnTime = time(NULL) + m_respawnDelay + m_corpseDelay;
++        m_respawnTime = time(NULL) + (m_respawnDelay / sWorld->getFloatConfig(CONFIG_RESPAWNSPEED)) + m_corpseDelay;
+ 
+         // always save boss respawn time at death to prevent crash cheating
+         if (sWorld->getBoolConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATELY) || isWorldBoss())
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index a0c3d1c..1999e10 100644
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1127,7 +1127,7 @@ void World::LoadConfigSettings(bool reload)
+     // 17
+     // 18
+     // 19
+-    // 20
++    m_float_configs[CONFIG_RESPAWNSPEED] = sConfigMgr->GetFloatDefault("Custom.RespawnSpeed", 1.0f);
+     // Visit http://www.realmsofwarcraft.com/bb for forums and information
+     //
+     // End of prepatch
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 9a726fa..748b020 100644
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -221,7 +221,7 @@ enum WorldFloatConfigs
+     // 28
+     // 29
+     // 30
+-    // 31
++    CONFIG_RESPAWNSPEED,
+     // 32
+     // 33
+     // 34
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 9097e0b..54982fb 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3217,6 +3217,18 @@ PacketSpoof.BanDuration = 86400
+ #
+ ###################################################################################################
+ 
++###################################################################################################
++#
++# Custom.RespawnSpeed
++# Set it to a number upper than 1 to speed up the respawn of mobs (and lower than 1 to slow down).
++# Default : 1.0 (Normal speed)
++#
++
++Custom.RespawnSpeed = 1.0
++
++#
++###################################################################################################
++
+ #
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+-- 
+2.1.0.rc1
+

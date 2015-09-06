@@ -1,0 +1,78 @@
+From 14045fcc53acba10c80a96d60efb878a8c4b7b2e Mon Sep 17 00:00:00 2001
+From: LordPsyan <realmsofwarcraft@gmail.com>
+Date: Fri, 4 Sep 2015 09:05:56 -0500
+Subject: [PATCH] FastFishing
+
+---
+ src/server/game/Spells/SpellEffects.cpp      |    3 +++
+ src/server/game/World/World.cpp              |    2 +-
+ src/server/game/World/World.h                |    2 +-
+ src/server/worldserver/worldserver.conf.dist |   12 ++++++++++++
+ 4 files changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/src/server/game/Spells/SpellEffects.cpp b/src/server/game/Spells/SpellEffects.cpp
+index 91eb733..9a78975 100644
+--- a/src/server/game/Spells/SpellEffects.cpp
++++ b/src/server/game/Spells/SpellEffects.cpp
+@@ -5153,6 +5153,9 @@ void Spell::EffectTransmitted(SpellEffIndex effIndex)
+                 case 3: lastSec = 17; break;
+             }
+ 
++            if (sWorld->getBoolConfig(CONFIG_FAST_FISHING))
++                lastSec = 17;
++
+             duration = duration - lastSec*IN_MILLISECONDS + FISHING_BOBBER_READY_TIME*IN_MILLISECONDS;
+             break;
+         }
+diff --git a/src/server/game/World/World.cpp b/src/server/game/World/World.cpp
+index 8476dcc..cec3b57 100644
+--- a/src/server/game/World/World.cpp
++++ b/src/server/game/World/World.cpp
+@@ -1127,7 +1127,7 @@ void World::LoadConfigSettings(bool reload)
+     // 04
+     // 05
+     // 06
+-    // 07
++    m_bool_configs[CONFIG_FAST_FISHING] = sConfigMgr->GetBoolDefault("Custom.FastFishing", false);
+     // 08
+     // 09
+     // 10
+diff --git a/src/server/game/World/World.h b/src/server/game/World/World.h
+index 11c527e..4141815 100644
+--- a/src/server/game/World/World.h
++++ b/src/server/game/World/World.h
+@@ -169,7 +169,7 @@ enum WorldBoolConfigs
+     // 08
+     // 09
+     // 10
+-    // 11
++    CONFIG_FAST_FISHING,
+     // 12
+     // 13
+     // 14
+diff --git a/src/server/worldserver/worldserver.conf.dist b/src/server/worldserver/worldserver.conf.dist
+index 3aa2d19..84b7b4d 100644
+--- a/src/server/worldserver/worldserver.conf.dist
++++ b/src/server/worldserver/worldserver.conf.dist
+@@ -3404,6 +3404,18 @@ PacketSpoof.BanDuration = 86400
+ #
+ ###################################################################################################
+ 
++###################################################################################################
++#
++# Custom.FastFishing
++# Set it to 1 to make fishing a lot faster!
++# Default : 0 (Fishing is normal)
++#
++
++Custom.FastFishing = 0
++
++#
++###################################################################################################
++
+ #
+ # Prepatch by LordPsyan.
+ # See http://www.realmsofwarcraft.com/bb for forums and information.
+-- 
+1.7.10.4
+
